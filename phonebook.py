@@ -1,6 +1,3 @@
-import os
-import csv
-
 from src import show_menu, show, new, edit, search
 
 
@@ -10,21 +7,29 @@ command_error_message = 'Введите число из диапазона 1-4 �
 exit_message = 'выход...'
 
 
-def start():
+def start() -> None:
     command = show_menu()
     match command:
-        case 1: show()
-        case 2: new()
-        case 3: edit()
-        case 4: search()
-        case 5: print(exit_message)
-        case None: command_error()
-
-
-def command_error():
-    print(command_error_message)
+        case 1:
+            show()
+        case 2:
+            new()
+        case 3:
+            edit()
+        case 4:
+            search()
+        case 5:
+            print(exit_message)
+            return
+        case None:
+            command_error()
     start()
 
 
+def command_error() -> None:
+    print(command_error_message)
+
+
 if __name__ == '__main__':
+    """Старт программы"""
     start()

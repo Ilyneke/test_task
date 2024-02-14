@@ -1,58 +1,60 @@
 import os
-import csv
 
-from .settings import FIELD_NAMES
+from .settings import FIELD_NAMES, MENU
 from .file import read
 
 
 def _get_terminal_lines() -> int:
+    """Функция возвращает количество помещаемых строк в консоли, работает только на linux"""
     if os.name == 'posix':
         return os.get_terminal_size().lines
     else:
         return 12
 
 
-def _get_max_widths(rows) -> dict:
+def _get_max_widths(rows: list) -> dict:
+    """Функция возвращает словарь из названий полей и максимальной шириной значения, нужно для красивого отображения"""
     width = {field: len(field) for field in FIELD_NAMES}
     for row in rows:
         width = {field: max(width[field], len(row[field])) for field in FIELD_NAMES}
     return width
 
 
-def _to_dict(reader: csv.DictReader) -> list:
-    print(reader)
-    result = []
-    for row in reader:
-        result.append(row.__dict__)
-    return result
+def _get_header(len_rows: int, width: dict) -> str:
+    """Функция формирует строку из названий столбцов в зависимости от максимальной ширины значений"""
+    num = '№'.ljust(len(str(len_rows)) + 1)
+    header = num + ' '.join([field.ljust(width[field]) for field in FIELD_NAMES])
+    return header
+
+
+def _get_formatted_row(row: dict, width: dict, len_rows: int, num: int) -> str:
+    """Функция формирует строку из значений записи, аналогично _get_header()"""
+    num = str(num).ljust(len(str(len_rows)) + 1)
+    formatted = num + ' '.join([row[field].ljust(width[field]) for field in FIELD_NAMES])
+    return formatted
 
 
 def show() -> None:
-    lines = _get_terminal_lines()
-
-    reader_data = read()
-    data = _to_dict(reader_data)
-
-    printed = 0
-    lines_all = 0
+    """Постраничный вывод записей из справочника"""
+    data = read()
+    if not data:
+        return
+    count_lines = _get_terminal_lines() - 2
     widths = _get_max_widths(rows=data)
-    print(*FIELD_NAMES, sep='\t')
-    print('№'.ljust(len(str(lines_all)) + 1) + ' '.join(
-        [field.ljust(widths[field]) for field in FIELD_NAMES]
-    ))
-
-    page = 0
+    header = _get_header(len_rows=len(data), width=widths)
+    print(header)
+    printed = 0
+    page = 1
     for row in data:
         printed += 1
-        print(str(printed).ljust(len(str(lines_all)) + 1) + ' '.join(
-            [row[field].ljust(widths[field]) for field in FIELD_NAMES])
-              )
-        if printed - page * lines > lines - 3 - bool(page) * 2:
+        formatted_row = _get_formatted_row(row=row, width=widths, len_rows=len(data), num=printed)
+        print(formatted_row)
+        if printed > count_lines * page - 1:
             command = input('Нажмите Enter для продолжения или наберите menu для выхода в меню: ')
             if not command:
                 page += 1
-                print('№'.ljust(len(str(lines_all)) + 1) + ' '.join(
-                    [field.ljust(widths[field]) for field in FIELD_NAMES]
-                ))
+                print(header)
             elif command == 'menu':
                 return
+    empty_lines = '\n' * (count_lines - printed % count_lines - len(MENU) - 2)
+    print(empty_lines)
