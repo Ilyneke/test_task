@@ -1,3 +1,5 @@
+import logging
+
 from .file import read, just_read_list, rewrite
 from .settings import NOT_FOUND_MESSAGE, FIELD_NAMES
 
@@ -48,19 +50,20 @@ def edit() -> None:
     """Редактирование записей"""
     data = read()
     if not data:
-        print(NOT_FOUND_MESSAGE)
+        logging.warning(NOT_FOUND_MESSAGE)
         return
-    start_edit_message = START_EDIT_MESSAGE + f'[0-{len(data) - 1}]'
+    start_edit_message = START_EDIT_MESSAGE + f'[0-{len(data)}]'
     print(start_edit_message)
     num = input()
-    while not (num.isdigit() and 0 <= int(num) <= len(data) - 1):
-        print(ERROR_NUMBER_MESSAGE)
+    while not (num.isdigit() and 0 <= int(num) <= len(data)):
+        logging.warning(ERROR_NUMBER_MESSAGE)
         num = input()
-    _print_chosen_row(data[int(num)])
+    num = int(num) - 1
+    _print_chosen_row(data[num])
     print(EDIT_MESSAGE)
     new_row = input()
     while not _validate(new_row):
-        print(ERROR_VALIDATION_MESSAGE)
+        logging.warning(ERROR_VALIDATION_MESSAGE)
         new_row = input()
-    new = _update(num=int(num), old=data[int(num)], new=new_row)
-    print(f'Измененная запись сохранена!:\n{new}', end='\n')
+    new = _update(num=num, old=data[num], new=new_row)
+    logging.info(f'Измененная запись сохранена!:\n{new}')

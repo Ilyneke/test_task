@@ -1,3 +1,5 @@
+import logging
+
 from .file import read
 from .settings import FIELD_NAMES
 
@@ -29,10 +31,13 @@ def _search_in_field(data: list[dict], field: str, search_keyword: str, width: d
 def _show(rows: list[dict], width: dict) -> None:
     """Вывод найденных записей"""
     header = '№'.ljust(width['id']) + ''.join([field.ljust(width[field]) for field in FIELD_NAMES])
+    print()
+    logging.info(f'Найдено {len(rows)} записей:')
     print(header)
     for row in rows:
         row = str(row['id']).ljust(width['id']) + ''.join([row[field].ljust(width[field]) for field in FIELD_NAMES])
         print(row)
+    print()
 
 
 def search():
@@ -53,5 +58,5 @@ def search():
     if founded:
         _show(rows=founded, width=width)
     else:
-        print(NOT_FOUND_MESSAGE)
+        logging.info(NOT_FOUND_MESSAGE)
         search()

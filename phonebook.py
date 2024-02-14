@@ -1,3 +1,6 @@
+import logging
+import sys
+
 from src import show_menu, show, new, edit, search
 
 
@@ -19,17 +22,14 @@ def start() -> None:
         case 4:
             search()
         case 5:
-            print(exit_message)
+            logging.info(exit_message)
             return
         case None:
-            command_error()
+            logging.warning(command_error_message)
     start()
-
-
-def command_error() -> None:
-    print(command_error_message)
 
 
 if __name__ == '__main__':
     """Старт программы"""
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(levelname)s %(message)s')
     start()
