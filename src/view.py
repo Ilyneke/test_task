@@ -7,7 +7,10 @@ from .file import read
 def _get_terminal_lines() -> int:
     """Функция возвращает количество помещаемых строк в консоли, работает только на linux"""
     if os.name == 'posix':
-        return os.get_terminal_size().lines
+        try:
+            return os.get_terminal_size().lines
+        except OSError:
+            return 12
     else:
         return 12
 
