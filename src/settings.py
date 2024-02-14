@@ -10,3 +10,4 @@ MENU = [
 NOT_FOUND_MESSAGE = "Файл phonebook.csv не найден, добавьте запись чтобы создать его"
 FILENAME = "phonebook.csv"
 DELIMITER = ','
+COMMAND_PROMPT = '-> '

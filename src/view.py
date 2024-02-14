@@ -1,7 +1,10 @@
 import os
 
-from .settings import FIELD_NAMES, MENU
+from .settings import FIELD_NAMES, MENU, COMMAND_PROMPT
 from .file import read
+
+
+VIEW_MESSAGE = 'Нажмите Enter для продолжения или наберите menu для выхода в меню:'
 
 
 def _get_terminal_lines() -> int:
@@ -42,22 +45,24 @@ def show() -> None:
     data = read()
     if not data:
         return
-    count_lines = _get_terminal_lines() - 2
+    count_lines = _get_terminal_lines() - 4
+    print(f'COUNT LINES: {count_lines}')
     widths = _get_max_widths(rows=data)
     header = _get_header(len_rows=len(data), width=widths)
-    print(header)
     printed = 0
     page = 1
+    print(header)
     for row in data:
-        printed += 1
         formatted_row = _get_formatted_row(row=row, width=widths, len_rows=len(data), num=printed)
         print(formatted_row)
-        if printed > count_lines * page - 1:
-            command = input('Нажмите Enter для продолжения или наберите menu для выхода в меню: ')
+        printed += 1
+        if printed > count_lines * page + (page - 1):
+            print(VIEW_MESSAGE)
+            command = input(COMMAND_PROMPT)
             if not command:
-                page += 1
                 print(header)
+                page += 1
             elif command == 'menu':
                 return
-    empty_lines = '\n' * (count_lines - printed % count_lines - len(MENU) - 2)
+    empty_lines = '\n' * (count_lines - printed % count_lines - len(MENU) + (page - 1))
     print(empty_lines)

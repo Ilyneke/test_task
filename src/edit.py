@@ -1,7 +1,7 @@
 import logging
 
 from .file import read, just_read_list, rewrite
-from .settings import NOT_FOUND_MESSAGE, FIELD_NAMES
+from .settings import NOT_FOUND_MESSAGE, FIELD_NAMES, COMMAND_PROMPT
 
 
 START_EDIT_MESSAGE = 'Введите номер записи, которую хотите отредактировать '
@@ -12,9 +12,9 @@ EDIT_MESSAGE = (f'Введите новые данные в формате:\n'
                 f'если хотите оставить поле таким же, то напишите в нем "/s":')
 
 
-def _print_chosen_row(row: dict) -> None:
+def _print_chosen_row(row: dict, num: int) -> None:
     """Вывод выбранной записи"""
-    print()
+    logging.info(f'Выбрана запись {num}:')
     widths = {field: max(len(field), len(row[field])) for field in FIELD_NAMES}
     header = ' '.join([field.ljust(widths[field]) for field in FIELD_NAMES])
     print(header)
@@ -52,18 +52,18 @@ def edit() -> None:
     if not data:
         logging.warning(NOT_FOUND_MESSAGE)
         return
-    start_edit_message = START_EDIT_MESSAGE + f'[0-{len(data)}]'
+    start_edit_message = START_EDIT_MESSAGE + f'[0-{len(data) - 1}]'
     print(start_edit_message)
-    num = input()
+    num = input(COMMAND_PROMPT)
     while not (num.isdigit() and 0 <= int(num) <= len(data)):
         logging.warning(ERROR_NUMBER_MESSAGE)
-        num = input()
-    num = int(num) - 1
-    _print_chosen_row(data[num])
+        num = input(COMMAND_PROMPT)
+    num = int(num)
+    _print_chosen_row(data[num], num)
     print(EDIT_MESSAGE)
-    new_row = input()
+    new_row = input(COMMAND_PROMPT)
     while not _validate(new_row):
         logging.warning(ERROR_VALIDATION_MESSAGE)
-        new_row = input()
+        new_row = input(COMMAND_PROMPT)
     new = _update(num=num, old=data[num], new=new_row)
     logging.info(f'Измененная запись сохранена!:\n{new}')
